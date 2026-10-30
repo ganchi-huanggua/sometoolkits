@@ -6,10 +6,10 @@ fi
 
 set -euo pipefail
 
-BASE_DIR="/liuhezhao"
-PROXY_DIR="$BASE_DIR/proxy"
+BASE_DIR="/home/u1120260369"
+PROXY_DIR="$BASE_DIR/setup/mihomo"
 MIHOMO_NAME="mihomo-linux-amd64-v3-v1.19.28"
-MIHOMO_BIN="/usr/local/bin/mihomo"
+MIHOMO_BIN="$BASE_DIR/.local/bin/mihomo"
 CONDA_BIN="$BASE_DIR/miniconda3/bin/conda"
 CONFIG_DIR="$HOME/.config/mihomo"
 BASHRC="$HOME/.bashrc"
@@ -20,10 +20,10 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # Errors stop later modules; already completed changes are not rolled back.
 
 # Check the key input before making installation changes.
-if [[ ! -s "$SCRIPT_DIR/public.txt" ]]; then
-    echo "Public key file is missing or empty: $SCRIPT_DIR/public.txt" >&2
-    exit 1
-fi
+# if [[ ! -s "$SCRIPT_DIR/public.txt" ]]; then
+#     echo "Public key file is missing or empty: $SCRIPT_DIR/public.txt" >&2
+#     exit 1
+# fi
 
 # ======================================================================
 # 1. Install mihomo and validate configuration
@@ -51,6 +51,7 @@ fi
     fi
 
     # Install mihomo.
+    mkdir -p "$(dirname -- "$MIHOMO_BIN")"
     install -m 755 "$MIHOMO_NAME" "$MIHOMO_BIN"
     "$MIHOMO_BIN" -v
 
@@ -210,52 +211,52 @@ EOF
 # ======================================================================
 # 4. Import public keys for root SSH login
 # ======================================================================
-(
-    umask 077
+# (
+#     umask 077
 
-    PUBLIC_KEY_FILE="$SCRIPT_DIR/public.txt"
-    AUTH_DIR="/root/.ssh"
-    AUTH_FILE="$AUTH_DIR/authorized_keys"
+#     PUBLIC_KEY_FILE="$SCRIPT_DIR/public.txt"
+#     AUTH_DIR="/root/.ssh"
+#     AUTH_FILE="$AUTH_DIR/authorized_keys"
 
-    if [[ ! -s "$PUBLIC_KEY_FILE" ]]; then
-        echo "Public key file is missing or empty: $PUBLIC_KEY_FILE" >&2
-        exit 1
-    fi
+#     if [[ ! -s "$PUBLIC_KEY_FILE" ]]; then
+#         echo "Public key file is missing or empty: $PUBLIC_KEY_FILE" >&2
+#         exit 1
+#     fi
 
-    mkdir -p "$AUTH_DIR"
-    chmod 700 "$AUTH_DIR"
+#     mkdir -p "$AUTH_DIR"
+#     chmod 700 "$AUTH_DIR"
 
-    if [[ -f "$AUTH_FILE" ]]; then
-        cp -p "$AUTH_FILE" \
-            "$AUTH_FILE.bak.$(date +%Y%m%d-%H%M%S).$$"
-    fi
+#     if [[ -f "$AUTH_FILE" ]]; then
+#         cp -p "$AUTH_FILE" \
+#             "$AUTH_FILE.bak.$(date +%Y%m%d-%H%M%S).$$"
+#     fi
 
-    touch "$AUTH_FILE"
-    chmod 600 "$AUTH_FILE"
+#     touch "$AUTH_FILE"
+#     chmod 600 "$AUTH_FILE"
 
-    # Ensure existing content ends with a newline.
-    if [[ -s "$AUTH_FILE" ]] &&
-        [[ -n "$(tail -c 1 "$AUTH_FILE")" ]]; then
-        printf '\n' >> "$AUTH_FILE"
-    fi
+#     # Ensure existing content ends with a newline.
+#     if [[ -s "$AUTH_FILE" ]] &&
+#         [[ -n "$(tail -c 1 "$AUTH_FILE")" ]]; then
+#         printf '\n' >> "$AUTH_FILE"
+#     fi
 
-    ADDED=0
+#     ADDED=0
 
-    while IFS= read -r KEY || [[ -n "$KEY" ]]; do
-        # Remove Windows CRLF line endings.
-        KEY="${KEY%$'\r'}"
+#     while IFS= read -r KEY || [[ -n "$KEY" ]]; do
+#         # Remove Windows CRLF line endings.
+#         KEY="${KEY%$'\r'}"
 
-        [[ "$KEY" =~ ^[[:space:]]*$ ]] && continue
-        [[ "$KEY" =~ ^[[:space:]]*# ]] && continue
+#         [[ "$KEY" =~ ^[[:space:]]*$ ]] && continue
+#         [[ "$KEY" =~ ^[[:space:]]*# ]] && continue
 
-        if ! grep -qxF -- "$KEY" "$AUTH_FILE"; then
-            printf '%s\n' "$KEY" >> "$AUTH_FILE"
-            ADDED=$((ADDED + 1))
-        fi
-    done < "$PUBLIC_KEY_FILE"
+#         if ! grep -qxF -- "$KEY" "$AUTH_FILE"; then
+#             printf '%s\n' "$KEY" >> "$AUTH_FILE"
+#             ADDED=$((ADDED + 1))
+#         fi
+#     done < "$PUBLIC_KEY_FILE"
 
-    echo "Added $ADDED public key(s) to $AUTH_FILE"
-)
+#     echo "Added $ADDED public key(s) to $AUTH_FILE"
+# )
 
 # Report completion only after every module succeeds.
 cat <<'EOF'
@@ -264,7 +265,7 @@ Setup completed. Mihomo was validated but not started.
 
 Run in your current terminal:
     source ~/.bashrc
-    tmux new -s mihomo
+    tmux new -s CVIT
     tmux source-file /liuhezhao/proxy/.tmux.conf
 Start mihomo inside tmux:
     mihomo ~/.config/mihomo -f ~/.config/mihomo/config.yaml
