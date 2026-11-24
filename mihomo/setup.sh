@@ -127,7 +127,6 @@ case ":$PATH:" in
     *) export PATH="/liuhezhao/tmux/bin:$PATH" ;;
 esac
 
-export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 # <<< liuhezhao environment <<<
 EOF
 
