@@ -45,9 +45,11 @@ def available(markup):
 def check(page):
     page.goto(URL, wait_until="domcontentloaded", timeout=60000)
     gpu = page.get_by_role("button", name="gpu", exact=True)
-    if not gpu.is_visible():
-        print("正在等待分区页面。如浏览器显示登录页，请在窗口中登录。", flush=True)
-    gpu.wait_for(timeout=300000)
+    try:
+        gpu.wait_for(state="visible", timeout=10000)
+    except BrowserTimeout:
+        print("GPU 按钮等待 10 秒后仍未出现。如页面要求登录，请完成登录。", flush=True)
+        gpu.wait_for(state="visible", timeout=295000)
     if "MuiButton-containedPrimary" not in (gpu.get_attribute("class") or "").split():
         gpu.click()
     page.locator("button.MuiButton-containedPrimary").filter(has_text=re.compile("^gpu$", re.I)).wait_for()
